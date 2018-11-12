@@ -8,6 +8,7 @@ import showGraph
 import copy
 import sys
 import threading
+import os
 
 def loadData(obstacle_path,Obs):
     vertices = list()
@@ -81,6 +82,7 @@ def isIn(obslines,point):
 obs = []
 obslines = []
 CpointSet = []
+CpointSetRverse = []
 
 def on_button_press(event):
     print("[%f,%f]"%(event.xdata, event.ydata))
@@ -121,11 +123,11 @@ def stepForward(start,goal):
 
     randDirt = (randPoint - nearest)/(np.linalg.norm(randPoint-nearest))
     #randDirt = np.array([1.0,0.0])
-    print("nearest")
-    print(nearest)
+    # print("nearest")
+    # print(nearest)
     newPoint = para_stepsize * randDirt + nearest
-    print("newPoint")
-    print(newPoint)
+    # print("newPoint")
+    # print(newPoint)
     if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
         CpointSet.append((newPoint[0],newPoint[1]))
         x_list = [nearest[0],newPoint[0]]
@@ -133,20 +135,89 @@ def stepForward(start,goal):
         ax.plot(x_list, y_list, color='r', linewidth=1, alpha=0.6)
         ax.scatter(newPoint[0], newPoint[1],c = 'g')
         fig.canvas.draw()
-        gnp = np.array([goal[0],goal[1]])
-        if np.linalg.norm(newPoint - gnp) < para_threshold:
+        # gnp = np.array([goal[0],goal[1]])
+        # if np.linalg.norm(newPoint - gnp) < para_threshold:
+        #     print("Reached Goal")
+        #     return False
+        # else:
+        #     return True
+        if checkMet(CpointSetRverse,newPoint,para_threshold):
             print("Reached Goal")
-            return False
-        else:
-            return True
-    else:
+            global reachFlag
+            reachFlag = True
         return True
+    else:
+        return False
+
+def checkMet(pointSet,point,threshold):
+    print("in checkMet pointSetsize = %d"%(len(pointSet)))
+    minDis = sys.float_info.max
+    for e in pointSet:
+        enp = np.array([e[0],e[1]])
+        tmpDis = np.linalg.norm(point - enp)
+        if tmpDis< minDis:
+            minDis = tmpDis
+    if tmpDis < threshold:
+        return True
+    else:
+        return False
+
+reachFlag = False
 
 
-def startRRTOneDirt(start,goal):
+def stepForwardReverse(start,goal):
+    para_stepsize = 20
+    para_threshold = 20
+    para_Dirthreshold = 0.3
+    randPoint = np.array([random.randint(0,600),random.randint(0,600)])
+    if random.random() < para_Dirthreshold:
+        randPoint = np.array([start[0],start[1]])
+
+    minDis = sys.float_info.max
+    nearest = np.array([0.0,0.0])
+    for e in CpointSetRverse:
+        p = np.array([e[0],e[1]])
+        distance = np.linalg.norm(randPoint-p)
+        if distance < minDis:
+            minDis = distance
+            nearest = p
+
+    randDirt = (randPoint - nearest)/(np.linalg.norm(randPoint-nearest))
+    #randDirt = np.array([1.0,0.0])
+    # print("nearest")
+    # print(nearest)
+    newPoint = para_stepsize * randDirt + nearest
+    # print("newPoint")
+    # print(newPoint)
+    if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
+        CpointSetRverse.append((newPoint[0],newPoint[1]))
+        x_list = [nearest[0],newPoint[0]]
+        y_list = [nearest[1],newPoint[1]]
+        ax.plot(x_list, y_list, color='r', linewidth=1, alpha=0.6)
+        ax.scatter(newPoint[0], newPoint[1],c = 'g')
+        fig.canvas.draw()
+        gnp = np.array([start[0],start[1]])
+        if checkMet(CpointSet,newPoint,para_threshold):
+            print("Reached Goal")
+            global reachFlag
+            reachFlag = True
+        return True
+    else:
+        return False
+
+def startRRTBiDirt(start,goal):
     CpointSet = [start]
-    while stepForward(start,goal):
-        print("finding path")
+    CpointSetRverse = [goal]
+    while True:
+        while not stepForward(start,goal):
+            pass
+        # print("ForwardEnd")
+        while not stepForwardReverse(start,goal):
+            pass
+        # print("BackwardEnd")
+        if reachFlag:
+            break
+        # print("finding path")
     print("Reached Goal")
 
 
@@ -183,10 +254,11 @@ if __name__ == "__main__":
     print("start at ")
     print(start)
     CpointSet.append(start)
+    CpointSetRverse.append(goal)
     print("goal at")
     print(goal)
     # fig.canvas.mpl_connect('button_press_event', on_button_press)
-    td =threading.Thread(target = startRRTOneDirt, args = (start,goal))
+    td =threading.Thread(target = startRRTBiDirt, args = (start,goal))
     td.start()
     # print("get here")
     # startRRTOneDirt(start)
