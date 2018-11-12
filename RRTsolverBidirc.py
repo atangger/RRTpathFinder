@@ -28,6 +28,9 @@ def loadData(obstacle_path,Obs):
         print(tmpObs)
         Obs.append(tmpObs)
 
+# from the start point (x0,y0)
+# draw a horizental line y = y0(x > x0)
+# to see if it intersect with the line ((x1,y1),(x2,y2))
 def isIntersec(line,point):
     x0 = point[0]
     y0 = point[1]
@@ -54,6 +57,8 @@ def isIntersec(line,point):
                 return True
     return False
 
+# for a perticular obsticle ob
+# determine wether point lies in it  
 def isInOb(ob,point):
     intersec = 0
     # print("in isInOb")
@@ -73,17 +78,22 @@ def isInOb(ob,point):
     else:
         return True
 
+# for all obsticles obslines
+# determine wether point lies in it  
 def isIn(obslines,point):
     for e in obslines:
         if isInOb(e,point):
             return True
     return False
 
+# obsticles points
 obs = []
+# obsticles lines
 obslines = []
 CpointSet = []
 CpointSetRverse = []
 
+# mouse callback only for debug
 def on_button_press(event):
     print("[%f,%f]"%(event.xdata, event.ydata))
     for e in obslines:
@@ -98,12 +108,14 @@ def on_button_press(event):
     ax.plot(x_list, y_list, color='r', linewidth=1, alpha=0.6)
     fig.canvas.draw()
 
+# determine whether point lies in the map range
 def isInRange(point):
     if point[0] < 0 or point[0] > 600 or point[1] < 0 or point[1] > 600:
         return False
     else:
         return True
 
+# try to add new point to RRT root at start 
 def stepForward(start,goal):
     para_stepsize = 20
     para_threshold = 20
@@ -149,6 +161,7 @@ def stepForward(start,goal):
     else:
         return False
 
+# Determine whether the point met the RRT pointSet
 def checkMet(pointSet,point,threshold):
     print("in checkMet pointSetsize = %d"%(len(pointSet)))
     minDis = sys.float_info.max
@@ -164,7 +177,7 @@ def checkMet(pointSet,point,threshold):
 
 reachFlag = False
 
-
+# try to add new point to RRT root at end 
 def stepForwardReverse(start,goal):
     para_stepsize = 20
     para_threshold = 20
