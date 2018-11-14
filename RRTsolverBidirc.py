@@ -40,7 +40,8 @@ def isIntersec(line,point):
     y2 = line[1][1]
     if y2 == y1:
         if y0 == y1:
-            return True
+            if (x1 >= x0 and x1 <= xx) or (x2 >= x0 and x2 <= x1):
+                return True
         else:
             return False
 
@@ -170,6 +171,9 @@ def checkMet(pointSet,point,threshold):
         tmpDis = np.linalg.norm(point - enp)
         if tmpDis< minDis:
             minDis = tmpDis
+    if tmpDis < 80:
+        print("tmpDis = %f"%(tmpDis))
+        
     if tmpDis < threshold:
         return True
     else:

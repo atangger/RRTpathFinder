@@ -36,7 +36,8 @@ def isIntersec(line,point):
     y2 = line[1][1]
     if y2 == y1:
         if y0 == y1:
-            return True
+            if (x1 >= x0 and x1 <= xx) or (x2 >= x0 and x2 <= x1):
+                return True
         else:
             return False
 
@@ -81,6 +82,7 @@ def isIn(obslines,point):
 obs = []
 obslines = []
 CpointSet = []
+CpointBefSet = []
 
 def on_button_press(event):
     print("[%f,%f]"%(event.xdata, event.ydata))
@@ -103,6 +105,9 @@ def isInRange(point):
         return True
 
 def stepForward(start,goal):
+    global CpointSet
+    global CpointBefSet 
+
     para_stepsize = 20
     para_threshold = 20
     para_Dirthreshold = 0.3
@@ -127,7 +132,10 @@ def stepForward(start,goal):
     print("newPoint")
     print(newPoint)
     if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
+        CpointBefSet.append((nearest[0],nearest[1]))
+
         CpointSet.append((newPoint[0],newPoint[1]))
+
         x_list = [nearest[0],newPoint[0]]
         y_list = [nearest[1],newPoint[1]]
         ax.plot(x_list, y_list, color='r', linewidth=1, alpha=0.6)
@@ -144,9 +152,32 @@ def stepForward(start,goal):
 
 
 def startRRTOneDirt(start,goal):
+    global CpointSet    
     CpointSet = [start]
+    global CpointBefSet  
     while stepForward(start,goal):
         print("finding path")
+
+    print("get here")
+    print("psetsize = %d"%(len(CpointSet)))
+    pointBef = CpointBefSet[-1]
+    pointAfter = CpointSet[-1]
+    while True:
+        print("get here")
+        x_list = [pointBef[0],pointAfter[0]]
+        y_list = [pointBef[1],pointAfter[1]]   
+        ax.plot(x_list, y_list, color='b', linewidth=3, alpha=0.6) 
+        fig.canvas.draw()
+        befidx = -1;
+        for i in range(len(CpointSet)):
+            if CpointSet[i] == pointBef:
+                befidx = i
+        if befidx == 0:
+            break
+        else:
+            pointAfter = pointBef
+            pointBef = CpointBefSet[befidx-1]
+
     print("Reached Goal")
 
 
