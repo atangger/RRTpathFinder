@@ -287,7 +287,7 @@ def startRRTBiDirt(start,goal):
             pointBef = CpointBefSet[befidx-1]
 
     pointBef = CpointBefSetReverse[reachIdxReverse]
-    pointAfter = CpointSetRverse[reachIdxReverse]
+    pointAfter = CpointSetRverse[reachIdxReverse+1]
     while True:
         # print("get here")
         x_list = [pointBef[0],pointAfter[0]]
