@@ -192,6 +192,12 @@ def checkMet(pointSet,point,threshold):
 
     # os.system("pause")
     if minDis < 80:
+        print("checkMet point = ")
+        print(point)
+        print("checkMet other point = ")
+        print(pointSet[minIdx])
+        print("indx = %d"%(minIdx))
+
         print("minDis = %f"%(minDis))
 
     if minDis < threshold:
@@ -286,8 +292,15 @@ def startRRTBiDirt(start,goal):
             pointAfter = pointBef
             pointBef = CpointBefSet[befidx-1]
 
-    pointBef = CpointBefSetReverse[reachIdxReverse]
-    pointAfter = CpointSetRverse[reachIdxReverse+1]
+    global reachIdxReverse
+    print("reached goal the bef idx = %d"%(reachIdxReverse))
+
+    pointBef = CpointBefSetReverse[reachIdxReverse-1]
+
+    print("poinrbef = ")
+    print(pointBef)
+
+    pointAfter = CpointSetRverse[reachIdxReverse]
     while True:
         # print("get here")
         x_list = [pointBef[0],pointAfter[0]]
