@@ -163,7 +163,7 @@ def startRRTOneDirt(start,goal):
     pointBef = CpointBefSet[-1]
     pointAfter = CpointSet[-1]
     while True:
-        print("get here")
+        # print("get here")
         x_list = [pointBef[0],pointAfter[0]]
         y_list = [pointBef[1],pointAfter[1]]   
         ax.plot(x_list, y_list, color='b', linewidth=3, alpha=0.6) 

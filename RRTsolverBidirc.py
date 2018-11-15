@@ -92,8 +92,11 @@ obs = []
 # obsticles lines
 obslines = []
 CpointSet = []
+CpointBefSet = []
 CpointSetRverse = []
-
+CpointBefSetReverse = []
+reachFlag = False
+reachIdxReverse = -1
 # mouse callback only for debug
 def on_button_press(event):
     print("[%f,%f]"%(event.xdata, event.ydata))
@@ -118,6 +121,10 @@ def isInRange(point):
 
 # try to add new point to RRT root at start 
 def stepForward(start,goal):
+    global CpointSet
+    global CpointBefSet    
+    global CpointSetRverse
+
     para_stepsize = 20
     para_threshold = 20
     para_Dirthreshold = 0.3
@@ -142,6 +149,7 @@ def stepForward(start,goal):
     # print("newPoint")
     # print(newPoint)
     if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
+        CpointBefSet.append((nearest[0],nearest[1]))
         CpointSet.append((newPoint[0],newPoint[1]))
         x_list = [nearest[0],newPoint[0]]
         y_list = [nearest[1],newPoint[1]]
@@ -166,23 +174,40 @@ def stepForward(start,goal):
 def checkMet(pointSet,point,threshold):
     print("in checkMet pointSetsize = %d"%(len(pointSet)))
     minDis = sys.float_info.max
-    for e in pointSet:
-        enp = np.array([e[0],e[1]])
+    minIdx = 0
+
+    for i in range(len(pointSet)):
+        enp = np.array([pointSet[i][0],pointSet[i][1]])
         tmpDis = np.linalg.norm(point - enp)
         if tmpDis< minDis:
+            minIdx = i
             minDis = tmpDis
-    if tmpDis < 80:
-        print("tmpDis = %f"%(tmpDis))
-        
-    if tmpDis < threshold:
+
+    # print("now point = ")
+    # print("now mindis = %f"%(minDis))
+    # print(point)
+    # print("now pointSet = ")
+    # for e in pointSet:
+    #     print(e)
+
+    # os.system("pause")
+    if minDis < 80:
+        print("minDis = %f"%(minDis))
+
+    if minDis < threshold:
+        global reachIdxReverse
+        reachIdxReverse = minIdx
         return True
     else:
         return False
 
-reachFlag = False
 
 # try to add new point to RRT root at end 
 def stepForwardReverse(start,goal):
+    global CpointSet    
+    global CpointSetRverse
+    global CpointBefSetReverse
+
     para_stepsize = 20
     para_threshold = 20
     para_Dirthreshold = 0.3
@@ -208,21 +233,28 @@ def stepForwardReverse(start,goal):
     # print(newPoint)
     if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
         CpointSetRverse.append((newPoint[0],newPoint[1]))
+        CpointBefSetReverse.append((nearest[0],nearest[1]))
+
         x_list = [nearest[0],newPoint[0]]
         y_list = [nearest[1],newPoint[1]]
         ax.plot(x_list, y_list, color='r', linewidth=1, alpha=0.6)
-        ax.scatter(newPoint[0], newPoint[1],c = 'g')
+        ax.scatter(newPoint[0], newPoint[1],c = 'y')
         fig.canvas.draw()
         gnp = np.array([start[0],start[1]])
-        if checkMet(CpointSet,newPoint,para_threshold):
-            print("Reached Goal")
-            global reachFlag
-            reachFlag = True
+        # if checkMet(CpointSet,newPoint,para_threshold):
+        #     print("Reached Goal")
+        #     global reachFlag
+        #     reachFlag = True
         return True
     else:
         return False
 
 def startRRTBiDirt(start,goal):
+    global CpointSet    
+    global CpointSetRverse
+    global CpointBefSetReverse
+    global CpointBefSet
+
     CpointSet = [start]
     CpointSetRverse = [goal]
     while True:
@@ -235,6 +267,42 @@ def startRRTBiDirt(start,goal):
         if reachFlag:
             break
         # print("finding path")
+
+    pointBef = CpointBefSet[-1]
+    pointAfter = CpointSet[-1]
+    while True:
+        # print("get here")
+        x_list = [pointBef[0],pointAfter[0]]
+        y_list = [pointBef[1],pointAfter[1]]   
+        ax.plot(x_list, y_list, color='b', linewidth=3, alpha=0.6) 
+        fig.canvas.draw()
+        befidx = -1;
+        for i in range(len(CpointSet)):
+            if CpointSet[i] == pointBef:
+                befidx = i
+        if befidx == 0:
+            break
+        else:
+            pointAfter = pointBef
+            pointBef = CpointBefSet[befidx-1]
+
+    pointBef = CpointBefSetReverse[reachIdxReverse]
+    pointAfter = CpointSetRverse[reachIdxReverse]
+    while True:
+        # print("get here")
+        x_list = [pointBef[0],pointAfter[0]]
+        y_list = [pointBef[1],pointAfter[1]]   
+        ax.plot(x_list, y_list, color='b', linewidth=3, alpha=0.6) 
+        fig.canvas.draw()
+        befidx = -1;
+        for i in range(len(CpointSetRverse)):
+            if CpointSetRverse[i] == pointBef:
+                befidx = i
+        if befidx == 0:
+            break
+        else:
+            pointAfter = pointBef
+            pointBef = CpointBefSetReverse[befidx-1]
     print("Reached Goal")
 
 
