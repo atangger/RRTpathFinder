@@ -54,6 +54,32 @@ def isIntersec(line,point):
                 return True
     return False
 
+def segmentintersect(p1, p2, q1, q2):
+        def crossprod2d(v1, v2):
+            return v1[0] * v2[1] - v1[1] * v2[0]
+        p, q, r, s = p1, q1, p2 - p1, q2 - q1
+
+        if crossprod2d(r, s) == 0:
+            if crossprod2d((q - p), r) == 0:
+                return False
+            else:
+                return False
+
+        u1 = crossprod2d((q - p), s) / crossprod2d(r, s)
+        u2 = crossprod2d((p - q), r) / crossprod2d(s, r)
+        if 0. < u1 < 1. and 0. < u2 < 1.:
+            return True
+        else:
+            return False
+
+def isIntersecOb(p1,p2,ob):
+    for e in ob:
+        q1 = np.array([e[0][0],e[0][1]])
+        q2 = np.array([e[1][0],e[1][1]])
+        if(segmentintersect(p1,p2,q1,q2)):
+            return True
+    return False
+
 def isInOb(ob,point):
     intersec = 0
     # print("in isInOb")
@@ -68,14 +94,24 @@ def isInOb(ob,point):
         if isIntersec(e,point):
             # print("Intersect")
             intersec+=1
+
     if intersec%2 == 0:
         return False
     else:
         return True
 
+
+
+
 def isIn(obslines,point):
     for e in obslines:
         if isInOb(e,point):
+            return True
+    return False
+
+def isIntersecObs(obslines,point1,point2):
+    for e in obslines:
+        if isIntersecOb(point1,point2,e):
             return True
     return False
 
@@ -131,6 +167,7 @@ def stepForward(start,goal):
     newPoint = para_stepsize * randDirt + nearest
     print("newPoint")
     print(newPoint)
+
     if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
         CpointBefSet.append((nearest[0],nearest[1]))
 
