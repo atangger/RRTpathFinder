@@ -7,6 +7,7 @@ import random, math
 import showGraph
 import copy
 import sys
+import os
 import threading
 
 def loadData(obstacle_path,Obs):
@@ -144,9 +145,9 @@ def stepForward(start,goal):
     global CpointSet
     global CpointBefSet 
 
-    para_stepsize = 20
+    para_stepsize = 30
     para_threshold = 20
-    para_Dirthreshold = 0.3
+    para_Dirthreshold = 0.5
     randPoint = np.array([random.randint(0,600),random.randint(0,600)])
     if random.random() < para_Dirthreshold:
         randPoint = np.array([goal[0],goal[1]])
@@ -168,7 +169,7 @@ def stepForward(start,goal):
     print("newPoint")
     print(newPoint)
 
-    if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint):
+    if not isIn(obslines,(newPoint[0],newPoint[1])) and isInRange(newPoint) and not isIntersecObs(obslines,nearest,newPoint):
         CpointBefSet.append((nearest[0],nearest[1]))
 
         CpointSet.append((newPoint[0],newPoint[1]))
@@ -189,11 +190,15 @@ def stepForward(start,goal):
 
 
 def startRRTOneDirt(start,goal):
+
+    # os.system("pause")
+
     global CpointSet    
     CpointSet = [start]
     global CpointBefSet  
     while stepForward(start,goal):
         print("finding path")
+
 
     print("get here")
     print("psetsize = %d"%(len(CpointSet)))

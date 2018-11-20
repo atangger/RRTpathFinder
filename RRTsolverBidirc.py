@@ -289,6 +289,7 @@ def stepForwardReverse(start,goal):
         return False
 
 def startRRTBiDirt(start,goal):
+    # os.system("pause")
     global CpointSet    
     global CpointSetRverse
     global CpointBefSetReverse
